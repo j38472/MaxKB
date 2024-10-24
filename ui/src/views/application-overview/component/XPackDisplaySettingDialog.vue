@@ -5,6 +5,7 @@
     v-model="dialogVisible"
     :close-on-click-modal="false"
     :close-on-press-escape="false"
+    destroy-on-close
     align-center
     class="display-setting-dialog"
   >
@@ -110,8 +111,21 @@
                   <img src="@/assets/display-bg3.png" alt="" width="270" class="ml-8" />
                 </div>
               </div>
-              <div style="position: absolute; bottom: 0">
+              <div
+                style="position: absolute; bottom: 0; padding-bottom: 8px; box-sizing: border-box"
+                class="p-16 text-center w-full"
+              >
                 <img src="@/assets/display-bg1.png" alt="" class="w-full" />
+                <el-text
+                  type="info"
+                  v-if="xpackForm.disclaimer"
+                  class="mt-8"
+                  style="font-size: 12px"
+                >
+                  <auto-tooltip :content="xpackForm.disclaimer_value">
+                    {{ xpackForm.disclaimer_value }}
+                  </auto-tooltip>
+                </el-text>
               </div>
             </div>
           </div>
@@ -218,6 +232,7 @@
                     <el-input-number
                       v-model="form.float_location.x.value"
                       :min="0"
+                      :step="1"
                       controls-position="right"
                     />
                     <span class="ml-4">px</span>
@@ -232,6 +247,7 @@
                     <el-input-number
                       v-model="form.float_location.y.value"
                       :min="0"
+                      :step="1"
                       controls-position="right"
                     />
                     <span class="ml-4">px</span>
@@ -301,8 +317,8 @@ const defaultSetting = {
     header_font_color: '#1f2329'
   },
   float_location: {
-    x: { type: '', value: 0 },
-    y: { type: '', value: 0 }
+    y: { type: 'bottom', value: 30 },
+    x: { type: 'right', value: 0 }
   }
 }
 
@@ -326,8 +342,8 @@ const xpackForm = ref<any>({
     header_font_color: '#1f2329'
   },
   float_location: {
-    x: { type: 'bottom', value: 30 },
-    y: { type: 'right', value: 0 }
+    y: { type: 'bottom', value: 30 },
+    x: { type: 'right', value: 0 }
   }
 })
 
@@ -348,25 +364,17 @@ const customStyle = computed(() => {
   }
 })
 
-watch(dialogVisible, (bool) => {
-  if (!bool) {
-    form.value = {
-      show_source: false
-    }
-    imgUrl.value = {
-      avatar: '',
-      float_icon: ''
-    }
-  }
-})
-
 function resetForm() {
   form.value = {
     ...defaultSetting
   }
+  xpackForm.value = {
+    ...defaultSetting
+  }
   imgUrl.value = {
     avatar: '',
-    float_icon: ''
+    float_icon: '',
+    user_avatar: ''
   }
 }
 
@@ -394,9 +402,10 @@ const open = (data: any, content: any) => {
   imgUrl.value.user_avatar = data.user_avatar
   xpackForm.value.disclaimer = data.disclaimer
   xpackForm.value.disclaimer_value = data.disclaimer_value
-  xpackForm.value.custom_theme.theme_color = data.custom_theme?.theme_color
-  xpackForm.value.custom_theme.header_font_color = data.custom_theme?.header_font_color || '#1f2329'
-
+  xpackForm.value.custom_theme = {
+    theme_color: data.custom_theme?.theme_color || '',
+    header_font_color: data.custom_theme?.header_font_color || '#1f2329'
+  }
   xpackForm.value.float_location = data.float_location
   form.value = xpackForm.value
 
